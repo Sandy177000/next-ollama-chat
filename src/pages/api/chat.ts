@@ -1,34 +1,38 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
-import { Ollama } from 'ollama'
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { Ollama } from 'ollama';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === 'POST') {
-    const ollama = new Ollama()
-    const { messages } = req.body
+    const ollamaBaseUrl = 'http://localhost:11434';
+
+    const ollama = new Ollama({ host: ollamaBaseUrl });
+    const { messages } = req.body;
 
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache, no-transform',
       'Connection': 'keep-alive',
-    })
+    });
 
     try {
       const stream = await ollama.chat({
         model: 'llama2',
         messages,
         stream: true,
-      })
+      });
 
       for await (const chunk of stream) {
-        res.write(`data: ${JSON.stringify(chunk)}\n\n`)
+        res.write(`data: ${JSON.stringify(chunk)}\n\n`);
       }
     } catch (error) {
-      console.error('Error:', error)
-      res.write(`data: ${JSON.stringify({ error: 'An error occurred' })}\n\n`)
+      console.error('Error:', error);
+      res.write(`data: ${JSON.stringify({ error: 'An error occurred' })}\n\n`);
     } finally {
-      res.end()
+      res.end();
     }
   } else {
-    res.status(405).json({ message: 'Method not allowed' })
+    res.status(405).json({ message: 'Method not allowed' });
   }
-}
+};
+
+export default handler;

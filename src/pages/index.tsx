@@ -7,10 +7,9 @@ type Message = {
   content: string;
 };
 
-export default function Chat() {
+const Chat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
-
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -24,68 +23,65 @@ export default function Chat() {
     localStorage.setItem("chatMessages", JSON.stringify(messages));
   }, [messages]);
 
-  const handleSendMessage = useCallback(
-    async (input: string) => {
-      if (!input.trim()) return;
+  const handleSendMessage = useCallback(async (input: string) => {
+    if (!input.trim()) return;
 
-      const userMessage = { role: "user", content: input };
-      setMessages((prevMessages) => [...prevMessages, userMessage]);
-      setIsStreaming(true);
-      setIsLoading(true);
+    const userMessage = { role: "user", content: input };
+    setMessages((prevMessages) => [...prevMessages, userMessage]);
+    setIsStreaming(true);
+    setIsLoading(true);
 
-      try {
-        const response = await fetch("/api/chat", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ messages: [...messages, userMessage] }),
-        });
+    try {
+      const apiUrl = 'http://localhost:11434/api/chat';
 
-        setIsLoading(false)
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ messages: [...messages, userMessage] }),
+      });
 
-        const reader = response.body?.getReader();
-        const decoder = new TextDecoder();
+      setIsLoading(false);
 
-        if (reader) {
-          let fullContent = "";
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
 
-            const chunk = decoder.decode(value);
-            const lines = chunk.split("\n\n");
+      if (reader) {
+        let fullContent = "";
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
 
-            for (const line of lines) {
-              if (line.startsWith("data: ")) {
-                const data = JSON.parse(line.slice(6));
-                fullContent += data.message.content;
-                setMessages((prevMessages) => {
-                  const newMessages = [...prevMessages];
-                  if (
-                    newMessages[newMessages.length - 1].role === "assistant"
-                  ) {
-                    newMessages[newMessages.length - 1].content = fullContent;
-                  } else {
-                    newMessages.push({
-                      role: "assistant",
-                      content: fullContent,
-                    });
-                  }
-                  return newMessages;
-                });
-              }
+          const chunk = decoder.decode(value);
+          const lines = chunk.split("\n\n");
+
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              const data = JSON.parse(line.slice(6));
+              fullContent += data.message.content;
+              setMessages((prevMessages) => {
+                const newMessages = [...prevMessages];
+                if (newMessages[newMessages.length - 1].role === "assistant") {
+                  newMessages[newMessages.length - 1].content = fullContent;
+                } else {
+                  newMessages.push({
+                    role: "assistant",
+                    content: fullContent,
+                  });
+                }
+                return newMessages;
+              });
             }
           }
         }
-      } catch (error) {
-        console.error("Error:", error);
-      } finally {
-        setIsStreaming(false);
       }
-    },
-    [messages]
-  );
+    } catch (error) {
+      console.error("Error:", error);
+    } finally {
+      setIsStreaming(false);
+    }
+  }, [messages]);
 
   const handleClearChat = useCallback(() => {
     setMessages([]);
@@ -94,9 +90,8 @@ export default function Chat() {
 
   return (
     <>
-      <div className=" mx-auto p-4 relative">
+      <div className="mx-auto p-4 relative">
         <MessageList messages={messages} />
-
         <ChatInput onSendMessage={handleSendMessage} disabled={isStreaming} />
         <button
           onClick={handleClearChat}
@@ -108,9 +103,11 @@ export default function Chat() {
       </div>
       {isLoading && (
         <div className="flex w-full h-full absolute z-10 bg-[rgba(0,0,0,0.03)] top-0 justify-center items-center">
-          <div className="absolute border-lime-400 border-5 w-10 h-10 bg-transparent animate-spin"></div>
+          <div className="absolute border-lime-400 border-5 w-10 h-10  animate-spin"></div>
         </div>
       )}
     </>
   );
-}
+};
+
+export default Chat;
