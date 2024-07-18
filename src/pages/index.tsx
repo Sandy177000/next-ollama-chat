@@ -32,7 +32,7 @@ const Chat = () => {
     setIsLoading(true);
 
     try {
-      const apiUrl = 'http://localhost:11434/api/chat';
+      const apiUrl = 'https://next-ollama-chat.vercel.app/api/chat';
 
       const response = await fetch(apiUrl, {
         method: "POST",
