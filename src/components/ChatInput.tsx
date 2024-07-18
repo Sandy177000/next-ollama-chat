@@ -20,10 +20,10 @@ export default function ChatInput({ onSendMessage, disabled }: ChatInputProps) {
         type="text"
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        className="flex-grow p-2 border rounded-l"
+        className="flex-grow p-2 border  outline-none bg-transparent"
         placeholder="Type your message..."
       />
-      <button type="submit" className="bg-blue-500 text-white p-2 rounded-r" disabled={disabled}>
+      <button type="submit" className=" border text-white p-2" disabled={disabled}>
         Send
       </button>
     </form>

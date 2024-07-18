@@ -1,8 +1,3 @@
-.
-├── components
-├── pages
-│   ├── _app.tsx
-│   └── chat.tsx
-└── struct.txt
-
-2 directories, 3 files
+- pause stream or interupt stream 
+- remember context
+- 
