@@ -1,11 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { Ollama } from 'ollama';
+import ollama from 'ollama';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === 'POST') {
-    const ollamaBaseUrl = 'http://localhost:11434';
 
-    const ollama = new Ollama({ host: ollamaBaseUrl });
     const { messages } = req.body;
 
     res.writeHead(200, {
